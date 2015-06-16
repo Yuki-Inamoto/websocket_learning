@@ -1,0 +1,9 @@
+<style>
+#draggable {
+    width: 100px;
+    height: 100px;
+    padding: 50px;
+    margin: 0;
+    border-radius: 10px;
+}
+</style>
