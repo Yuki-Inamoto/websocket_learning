@@ -1,0 +1,1 @@
+Tornadoのdemoの一つ，websocketディレクトリ内のwebsocketを用いたチャットを位置情報もリアルタイムで共有できるように改造しています。
