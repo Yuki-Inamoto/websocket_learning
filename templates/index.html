@@ -9,9 +9,6 @@
     <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"></script>
 
 
-
-
-
   </head>
   <body>
     <div id="body">
@@ -19,7 +16,6 @@
         {% for message in messages %}
           {% include "message.html" %}
         {% end %}
-
       </div>
       <div id="input">
         <form action="/a/message/new" method="post" id="messageform">

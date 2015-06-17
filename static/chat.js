@@ -78,13 +78,13 @@ var updater = {
 
         console.log("MESSAGE" + message.toSource());
 
-
         var existing = $("#m" + message.id);
+         console.log("EXISTING" + existing.toSource());
 
         existing.css("left",message.left);
         existing.css("top",message.top);
 
-        $('html,body').animate({scrollTop: message.top, scrollLeft: message.left}, 1000);
+        $('html,body').animate({top: message.top, left: message.left-5}, 1000);
 
         console.log("position=" + existing.position());
 
@@ -92,16 +92,26 @@ var updater = {
         var node = $(message.html).draggable({
         stop: function(event, ui) {
               console.log("node="+ node.position());
-              message['left'] = node.position().left
-              message['top'] = node.position().top
-              message['action'] = "move"
-              updater.socket.send(JSON.stringify(message));
+              send_move(message["id"], node.position().top, node.position().left)
         }});
 
         node.hide();
         box = $("#inbox").append(node);
 
         node.slideDown();
+        //node.offset({top:100, left:100});
     }
+
+
 };
 
+ function send_move(id, top, left) {
+              message = {}
+              message['id'] = id
+              message['left'] = left
+              message['top'] = top
+              message['action'] = "move"
+              console.log("SEND" + message.toSource());
+
+              updater.socket.send(JSON.stringify(message));
+ }

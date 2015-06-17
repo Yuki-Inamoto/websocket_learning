@@ -1,5 +1,18 @@
 <div class="message" id="m{{ message["id"] }}">{% module linkify(message["body"]) %}
+{% for sticky in sticky_position %}
+    {% if message["id"] == sticky["id"] %}
+        {% set message["top"] = sticky["top"]%}
+        {% set message["left"] = sticky["left"]%}
+    {% end %}
+{% end %}
 <script type="text/javascript">
-    $('#m{{ message["id"] }}').draggable();
+    console.log("In message.html");
+    sticky = $('#m{{ message["id"] }}').draggable({
+        stop: function(event, ui) {
+              message["top"] = $('#m{{ message["id"] }}').position().top
+              message["left"] = $('#m{{ message["id"] }}').position().left
+              send_move("{{ message["id"] }}", message["top"], message["left"])
+        }});
+    sticky.animate({top: {{message["top"]}}, left: {{message["left"]}} }, 1000);
 </script>
 </div>

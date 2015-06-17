@@ -31,8 +31,10 @@ from tornado.options import define, options
 
 define("port", default=8888, help="run on the given port", type=int)
 
+sticky_position = []
 
 class Application(tornado.web.Application):
+
     def __init__(self):
         handlers = [
             (r"/", MainHandler),
@@ -49,7 +51,8 @@ class Application(tornado.web.Application):
 
 class MainHandler(tornado.web.RequestHandler):
     def get(self):
-        self.render("index.html", messages=ChatSocketHandler.cache)
+
+        self.render("index.html", messages=ChatSocketHandler.cache, sticky_position=sticky_position)
 
 class ChatSocketHandler(tornado.websocket.WebSocketHandler):
     waiters = set()
@@ -95,28 +98,47 @@ class ChatSocketHandler(tornado.websocket.WebSocketHandler):
                 "top": parsed["top"],
                 }
 
-            chat["html"] = tornado.escape.to_basestring(
-                self.render_string("message.html", message=chat))
+            position = {
+                "id": chat["id"],
+                "body": parsed["body"],
+                "left": parsed["left"],
+                "top": parsed["top"],
+            }
 
-            logging.info("CREATE")
+            sticky_position.append(position)
+
+            chat["html"] = tornado.escape.to_basestring(
+                self.render_string("message.html", message=chat, sticky_position=sticky_position))
+
+            logging.info("UPDATE Sticky" + "%r", sticky_position)
 
             ChatSocketHandler.update_cache(chat)
             ChatSocketHandler.send_updates(chat)
 
         elif parsed["action"] == "move":
-            logging.info("MOVEEEEEEEEEEEEE" + "%r", parsed)
+            logging.info("MOVE" + "%r", parsed)
+
             chat = {
                 "id": parsed["id"],
-                "body": parsed["body"],
                 "left": parsed["left"],
                 "top": parsed["top"],
                 }
-            for waiter in self.waiters:
-                try:
-                    waiter.write_message(chat)
-                except:
-                    logging.error("Error sending message", exc_info=True)
 
+            #for sticky in sticky_position:
+             #   if sticky["id"] == parsed["id"]:
+              #      sticky.update(chat)
+
+            sticky = self.search_sticky(parsed["id"])
+            sticky.update(chat)
+
+            ChatSocketHandler.send_updates(chat)
+
+    def search_sticky(self, id):
+        for sticky in sticky_position:
+                if sticky["id"] == id:
+                    logging.info("SEARCH")
+
+                    return sticky
 
 
 def main():
