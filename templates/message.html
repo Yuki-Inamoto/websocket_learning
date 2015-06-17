@@ -1,1 +1,5 @@
-<div class="message" id="m{{ message["id"] }}">{% module linkify(message["body"]) %}</div>
+<div class="message" id="m{{ message["id"] }}">{% module linkify(message["body"]) %}
+<script type="text/javascript">
+    $('#m{{ message["id"] }}').draggable();
+</script>
+</div>

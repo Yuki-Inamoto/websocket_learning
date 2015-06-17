@@ -86,18 +86,37 @@ class ChatSocketHandler(tornado.websocket.WebSocketHandler):
         logging.info("got message %r", message)
         parsed = tornado.escape.json_decode(message)
 
-        chat = {
-            "id": str(uuid.uuid4()),
-            "body": parsed["body"],
-            "left": parsed["left"],
-            "top": parsed["top"],
-            }
+        if parsed["action"] == "create":
 
-        chat["html"] = tornado.escape.to_basestring(
-            self.render_string("message.html", message=chat))
+            chat = {
+                "id": str(uuid.uuid4()),
+                "body": parsed["body"],
+                "left": parsed["left"],
+                "top": parsed["top"],
+                }
 
-        ChatSocketHandler.update_cache(chat)
-        ChatSocketHandler.send_updates(chat)
+            chat["html"] = tornado.escape.to_basestring(
+                self.render_string("message.html", message=chat))
+
+            logging.info("CREATE")
+
+            ChatSocketHandler.update_cache(chat)
+            ChatSocketHandler.send_updates(chat)
+
+        elif parsed["action"] == "move":
+            logging.info("MOVEEEEEEEEEEEEE" + "%r", parsed)
+            chat = {
+                "id": parsed["id"],
+                "body": parsed["body"],
+                "left": parsed["left"],
+                "top": parsed["top"],
+                }
+            for waiter in self.waiters:
+                try:
+                    waiter.write_message(chat)
+                except:
+                    logging.error("Error sending message", exc_info=True)
+
 
 
 def main():

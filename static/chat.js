@@ -16,6 +16,8 @@ $(document).ready(function() {
     if (!window.console) window.console = {};
     if (!window.console.log) window.console.log = function() {};
 
+
+
     $("#messageform").live("submit", function() {
         newMessage($(this));
 
@@ -31,6 +33,8 @@ $(document).ready(function() {
 
     updater.start();
 });
+
+
 
 
 function newMessage(form) {
@@ -49,6 +53,7 @@ jQuery.fn.formToDict = function() {
     }
 
     if (json.next) delete json.next;
+    json['action'] = "create"
     json['left'] = 0
     json['top'] = 0
 
@@ -71,16 +76,26 @@ var updater = {
 
     showMessage: function(message) {
 
+        console.log("MESSAGE" + message.toSource());
+
+
         var existing = $("#m" + message.id);
+
+        existing.css("left",message.left);
+        existing.css("top",message.top);
+
+        $('html,body').animate({scrollTop: message.top, scrollLeft: message.left}, 1000);
+
         console.log("position=" + existing.position());
-        existing.draggable();
+
         if (existing.length > 0) return;
         var node = $(message.html).draggable({
         stop: function(event, ui) {
               console.log("node="+ node.position());
               message['left'] = node.position().left
               message['top'] = node.position().top
-              console.log(message);
+              message['action'] = "move"
+              updater.socket.send(JSON.stringify(message));
         }});
 
         node.hide();
